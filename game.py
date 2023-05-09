@@ -6,17 +6,7 @@ import pygame
 
 WIDTH = 800
 HEIGHT = 500
-FPS = 144
-
-# IA
-actions = [0, 1]
-state_size = (HEIGHT + 1, HEIGHT + 1, WIDTH + 1)
-q_table = np.zeros(state_size + (len(actions),))
-epsilon = 1.0
-epsilon_min = 0.01
-epsilon_decay = 0.999
-alpha = 0.1
-gamma = 0.99
+FPS = 45
 
 generation = 0
 pygame.font.init()
@@ -94,34 +84,10 @@ def reset_game():
     global bird, pipeTable
     bird = Bird()
     pipeTable = [Pipe()]
-
-def get_game_state(bird, pipe):
-    bird_y = int(round(bird.y))
-    pipe_y = int(round(pipe.y))
-    pipe_x = int(round(pipe.x - bird.x))
-
-    bird_y = max(0, min(HEIGHT, bird_y))
-    pipe_y = max(0, min(HEIGHT, pipe_y))
-    pipe_x = max(0, min(WIDTH, pipe_x))
-
-    return bird_y, pipe_y, pipe_x
-
-def choose_action(state, q_table, epsilon):
-    if np.random.random() < epsilon:
-        return np.random.choice(actions)  # Choisissez une action aléatoire
-    else:
-        return np.argmax(q_table[state])  # Choisissez l'action avec la plus grande valeur Q
-
+    
 def draw_generation(gen):
     text = font.render(f"Génération : {gen}", True, (255, 255, 255))
     screen.blit(text, (10, 10))
-
-def check_passed_pipe(bird: Bird, pipe: Pipe) -> int:
-    if not pipe.passed and bird.x > pipe.x + pipe_img.get_width():
-        pipe.passed = True
-        return 5
-    return 0
-
 
 ##### INSTANCES #####
 
@@ -136,7 +102,6 @@ while restart:
     reset_game()
     generation += 1
     running = True
-    state = get_game_state(bird, pipeTable[0])
 
     while running:
         # Gestion des événements
@@ -145,10 +110,6 @@ while restart:
                 running = False
                 restart = False
 
-        # Choisir une action à partir de la table Q
-        action = choose_action(state, q_table, epsilon)
-        if action == 1:
-            bird.jump()
 
         # Mettre à jour la position de l'oiseau et des tuyaux
         bird.moove()
@@ -159,29 +120,9 @@ while restart:
         if pipeTable[-1].x < WIDTH - (25 / 100 * WIDTH):
             pipeTable.append(Pipe())
 
-        # Récompense initiale pour la survie
-        reward = 0.1
-
-        # Vérifier si l'oiseau a passé un tuyau
-        for pipe in pipeTable:
-            reward += check_passed_pipe(bird, pipe)
-
         # Vérifier si l'oiseau est encore en vie
         if not bird.isAlive(pipes=pipeTable):
             running = False
-            reward = -100
-
-        # Calculer le nouvel état du jeu
-        next_state = get_game_state(bird, pipeTable[0])
-
-        # Mettre à jour la table Q en fonction de l'état actuel, de l'action et de la récompense
-        q_table[state][action] = (1 - alpha) * q_table[state][action] + alpha * (reward + gamma * np.max(q_table[next_state]))
-
-        # Réduire epsilon pour diminuer progressivement l'exploration
-        epsilon = max(epsilon_min, epsilon * epsilon_decay)
-
-        # Passer au nouvel état
-        state = next_state
 
         # Dessiner l'arrière-plan
         for i in range(3):
@@ -205,4 +146,4 @@ while restart:
         # Contrôler le nombre d'images par seconde
         clock.tick(FPS)
         
-    pygame.time.delay(0)
+    pygame.time.delay(250)
