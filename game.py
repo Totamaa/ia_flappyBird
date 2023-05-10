@@ -2,6 +2,7 @@ import random
 import numpy as np
 import pygame
 import math
+import sys
 
 ##### CONSTANTS #####
 
@@ -80,8 +81,6 @@ class Population:
         for bird in self.birds:
             if bird.isAlive(pipes):
                 alive_birds += 1
-            else:
-                bird.score = 0  # Reset the score for dead birds
         return alive_birds == 0
 
 
@@ -95,6 +94,7 @@ class Bird:
         self.img = bird_img
         self.score = 0
         self.fitness = 0
+        self.alive = True
 
         if brain is not None:
             self.brain = brain.copy()
@@ -109,7 +109,8 @@ class Bird:
         self.y += self.velocity
 
     def draw(self):
-        screen.blit(self.img, (self.x, self.y))
+        if self.alive:
+            screen.blit(self.img, (self.x, self.y))
 
     def think(self, pipes):
         closest_pipe = None
@@ -135,17 +136,18 @@ class Bird:
         return pygame.Rect(self.x, self.y, self.img.get_width(), self.img.get_height())
 
     def isAlive(self, pipes) -> bool:
-        if self.y < 0 or self.y > HEIGHT:
+        if not self.alive:  # If the bird is already dead, return False
             return False
 
-        # Ajout de la vérification pour les côtés gauche et droit de l'écran
-        if self.x < 0 or self.x > WIDTH:
+        if self.y < 0 or self.y > HEIGHT:
+            self.alive = False
             return False
 
         bird_rect = self.rect()
         for pipe in pipes:
             upper_pipe_rect, lower_pipe_rect = pipe.rects()
             if bird_rect.colliderect(upper_pipe_rect) or bird_rect.colliderect(lower_pipe_rect):
+                self.alive = False
                 return False
 
         return True
@@ -248,8 +250,8 @@ def mutate(weights, mutation_rate):
     return new_weights
 
 
-
 def sigmoid(x):
+    x = np.clip(x, -500, 500)
     return 1 / (1 + math.exp(-x))
 
 
@@ -313,3 +315,6 @@ while restart:
     # Nouvelle génération
     population.new_generation()
     pygame.time.delay(250)
+
+pygame.quit()
+sys.exit()
