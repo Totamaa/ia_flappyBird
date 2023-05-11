@@ -62,7 +62,7 @@ class Pipe:
         self.x = x
         midHeight = HEIGHT / 2
         self.y = random.randint(midHeight - 100, midHeight + 100)
-        self.space = random.randint(175, 200)
+        self.space = random.randint(125, 250)
         self.img = pipe_img
         self.passed = False
 
@@ -109,7 +109,11 @@ while restart:
             if event.type == pygame.QUIT:
                 running = False
                 restart = False
-
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    bird.jump()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                bird.jump()
 
         # Mettre à jour la position de l'oiseau et des tuyaux
         bird.moove()
