@@ -239,7 +239,7 @@ def mutate(weights, mutation_rate):
 
 
 def sigmoid(x):
-    x = np.clip(x, -500, 500)
+    x = np.clip(x, -1000, 1000)
     return 1 / (1 + math.exp(-x))
 
 
