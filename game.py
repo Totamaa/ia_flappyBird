@@ -39,49 +39,38 @@ class Population:
 
     def update(self, pipes):
         for bird in self.birds:
-            bird.think(pipes)
-            bird.score += 1
-            bird.moove()
+            if bird.alive:
+                bird.think(pipes)
+                bird.score += 1
+                bird.moove(pipes)
 
     def draw(self):
         for bird in self.birds:
-            bird.draw()
+            if bird.alive:
+                bird.draw()
             
     def new_generation(self):
-        self.evaluate_fitness()
         new_birds = []
         
         for _ in range(self.size):
             parent = self.select_parent()
             child_brain = parent.brain.copy()
-            child_brain.mutateSNN(0.1)
+            child_brain.mutateSNN(0.25)
             child = Bird(child_brain)
             new_birds.append(child)
         
         self.birds = new_birds
 
-    def evaluate_fitness(self):
-        total_score = sum([bird.score for bird in self.birds])
-        for bird in self.birds:
-            bird.fitness = bird.score / total_score
 
     def select_parent(self):
-        index = 0
-        r = random.random()
-        
-        while r > 0:
-            r = r - self.birds[index].fitness
-            index += 1
-        
-        index -= 1
-        return self.birds[index]
+        scores = [bird.score for bird in self.birds]
+        return random.choices(self.birds, weights=scores)[0]
 
-    def all_dead(self, pipes) -> bool:
-        alive_birds = 0
+    def all_dead(self) -> bool:
         for bird in self.birds:
-            if bird.isAlive(pipes):
-                alive_birds += 1
-        return alive_birds == 0
+            if bird.alive:
+                return False
+        return True
 
 
 
@@ -93,7 +82,6 @@ class Bird:
         self.velocity = 0
         self.img = bird_img
         self.score = 0
-        self.fitness = 0
         self.alive = True
 
         if brain is not None:
@@ -104,9 +92,10 @@ class Bird:
     def jump(self):
         self.velocity = -10
 
-    def moove(self):
+    def moove(self, pipes):
         self.velocity += self.gravity
         self.y += self.velocity
+        self.isAlive(pipes)
 
     def draw(self):
         if self.alive:
@@ -157,8 +146,8 @@ class Pipe:
     def __init__(self, x=WIDTH + pipe_img.get_width()) -> None:
         self.x = x
         midHeight = HEIGHT / 2
-        self.y = random.randint(midHeight - 100, midHeight + 100)
-        self.space = random.randint(175, 200)
+        self.y = random.randint(midHeight - 125, midHeight + 125)
+        self.space = random.randint(150, 200)
         self.img = pipe_img
         self.passed = False
 
@@ -287,7 +276,7 @@ while restart:
             pipeTable.append(Pipe())
 
         # Vérifier si tous les oiseaux sont morts
-        if population.all_dead(pipeTable):
+        if population.all_dead():
             running = False
 
         # Dessiner l'arrière-plan
