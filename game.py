@@ -6,13 +6,25 @@ import sys
 
 ##### CONSTANTS #####
 
-POPULATION = 100
+# taille de la fenêtre
 WIDTH = 800
 HEIGHT = 500
 FPS = 45
 
+# difficulté
+PIPE_FREQUENCY = 25 / 100 # plus c'est petit, plus il y a de tuyaux
+CHANGEMENT_HAUTEUR_PIPE = 100 # plus c'est grand, plus les tuyaux peuvent changer de hauteur
+ECART_MIN = 125
+ECART_MAX = 200
+
+# ia
+POPULATION = 150
+TAUX_DE_MUTATION = 0.1
+
+##### VARIABLES #####
 generation = 0
 bestScore = 0
+
 pygame.font.init()
 font = pygame.font.Font(None, 36)
 
@@ -55,7 +67,7 @@ class Population:
         for _ in range(self.size):
             parent = self.select_parent()
             child_brain = parent.brain.copy()
-            child_brain.mutateSNN(0.25)
+            child_brain.mutateSNN(TAUX_DE_MUTATION)
             child = Bird(child_brain)
             new_birds.append(child)
         
@@ -64,7 +76,11 @@ class Population:
 
     def select_parent(self):
         scores = [bird.score for bird in self.birds]
-        return random.choices(self.birds, weights=scores)[0]
+        poids = [(score - min(scores)) / (max(scores) - min(scores) + 1e-8) for score in scores]
+        
+        if sum(poids) == 0:
+            return random.choice(self.birds)
+        return random.choices(self.birds, weights=poids)[0]
 
     def all_dead(self) -> bool:
         for bird in self.birds:
@@ -146,8 +162,8 @@ class Pipe:
     def __init__(self, x=WIDTH + pipe_img.get_width()) -> None:
         self.x = x
         midHeight = HEIGHT / 2
-        self.y = random.randint(midHeight - 125, midHeight + 125)
-        self.space = random.randint(150, 200)
+        self.y = random.randint(midHeight - CHANGEMENT_HAUTEUR_PIPE, midHeight + CHANGEMENT_HAUTEUR_PIPE)
+        self.space = random.randint(ECART_MIN, ECART_MAX)
         self.img = pipe_img
         self.passed = False
 
@@ -271,7 +287,7 @@ while restart:
             pipe.moove()
 
         # Ajouter un nouveau tuyau si nécessaire
-        if pipeTable[-1].x < WIDTH - (25 / 100 * WIDTH):
+        if pipeTable[-1].x < WIDTH - (PIPE_FREQUENCY * WIDTH):
             pipeTable.append(Pipe())
 
         # Vérifier si tous les oiseaux sont morts
