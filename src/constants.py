@@ -1,24 +1,24 @@
 import pygame
 
-# Taille de la fenêtre
-WIDTH = 800
-HEIGHT = 500
-FPS = 60
+# Screen size
+SCREEN_WIDTH: int = 800
+SCREEN_HEIGHT: int = 500
+FPS: int = 60
 
-# Difficulté
-PIPE_FREQUENCY = 0.25  # Plus c'est petit, plus il y a de tuyaux
-CHANGEMENT_HAUTEUR_PIPE = 100  # Plus c'est grand, plus les tuyaux peuvent changer de hauteur
-ECART_MIN = 125
-ECART_MAX = 175
+# Difficulty settings
+PIPE_FREQUENCY: float = 0.25  # Lower values mean more pipes
+PIPE_HEIGHT_CHANGE: int = 100  # Higher values mean pipes can change height more
+GAP_MIN: int = 125
+GAP_MAX: int = 175
 
-# Bird
-BIRD_X = 100
-BIRD_Y = 300
-GRAVITY = 0.5
-JUMP_VELOCITY = -10
+# Bird settings
+BIRD_X: int = 100
+BIRD_Y: int = 300
+GRAVITY: float = 0.5
+JUMP_VELOCITY: float = -10
 
-# Joueur
-PLAYER_TYPE = 'human'  # Peut être 'human' ou un autre type d'IA
+# Player type
+PLAYER_TYPE: str = 'human'  # Can be 'human' or another AI type
 
 # Pygame setup
 pygame.font.init()
