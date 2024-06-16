@@ -6,7 +6,7 @@ SCREEN_HEIGHT: int = 500
 FPS: int = 60
 
 # Difficulty settings
-PIPE_FREQUENCY: float = 0.25  # Lower values mean more pipes
+PIPE_FREQUENCY: float = 0.33  # Lower values mean more pipes
 PIPE_HEIGHT_CHANGE: int = 100  # Higher values mean pipes can change height more
 GAP_MIN: int = 125
 GAP_MAX: int = 175
