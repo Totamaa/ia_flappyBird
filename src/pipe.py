@@ -21,6 +21,14 @@ class Pipe(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw the pipe on the screen"""
+        # Draw lower pipe
+        screen.blit(self.image, self.rect.topleft)
+        # Draw upper pipe (flipped)
+        upper_pipe_rect = self.image.get_rect(topleft=(self.rect.x, self.y - self.gap // 2 - self.image.get_height()))
+        screen.blit(pygame.transform.flip(self.image, False, True), upper_pipe_rect.topleft)
+
     def check_collision(self, bird: Bird) -> bool:
         """Check if the pipe collides with the bird"""
         upper_rect = pygame.Rect(self.rect.x, 0, self.image.get_width(), self.y - self.gap // 2)
